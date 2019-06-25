@@ -1,0 +1,13 @@
+# These are shell variables for push-to-server
+
+# Hostname to push to
+TARGET=time.hawkeworks.com
+
+# If these files are for a live-site, which port will they run on?
+PORT=3000
+
+# If live-site, Where should nginx expose this port? (like /foo/)
+LOCATION=/
+
+# so we can use the development versions
+# DOESNT WORK BUILD='rm -rf node_modules/appmgr && cp -a ../appmgr node_modules'
