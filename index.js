@@ -6,20 +6,29 @@ const unix = H.safe('the <small>UNIX</small> epoch')
 
 async function create (...options) {
   const m = new AppMgr(...options)
+  addRoutes(m)
+  await m.start()
+  return m
+}
 
+function addRoutes (m) {
   m.app.get('/', async (req, res) => {
     const units = parseFloat(req.query.units) || 1
     const offset = parseFloat(req.query.offset) || 0
     const epoch = req.query.epoch || (
       offset ? 'the given offset time' : unix
     )
+    const type = req.query.accept
+    if (type) req.headers['accept'] = type
+    const cycle = req.query.cycle ? req.query.cycle.split(/;/) : false
+    console.log({ cycle })
+
     const now = (Date.now() / 1000) - offset
     const time = (Math.round(now / units) * units)
     const cleaner = (Math.round(time * 1000) / 1000)
     m.lastTimeServed = cleaner // for easy access by testers
     const text = cleaner
-    const type = req.query.accept
-    if (type) req.headers['accept'] = type
+
     function link (mods) {
       const args = Object.assign({ units, offset, epoch, type }, mods)
       if (args.offset === 0) delete args.offset
@@ -28,6 +37,13 @@ async function create (...options) {
       if (args.type === 'text/html') delete args.type
       return '/?' + querystring.stringify(args)
     }
+
+    if (cycle) {
+      const index = Math.round(time / units) % cycle.length
+      res.send(cycle[index])
+      return
+    }
+
     res.format({
       text: function () {
         res.send('' + time)
@@ -91,9 +107,6 @@ ${req.appmgr.footer}
       }
     })
   })
-
-  await m.start()
-  return m
 }
 
 module.exports = { create }
