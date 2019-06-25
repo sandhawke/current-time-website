@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "For testing, a website that displays the current time (rounded)",
   "main": "index.js",
+  "bin": "run.js",
   "scripts": {
     "test": "npx standard && npx tap --cov test*.js test/*.js",
     "tap": "npx tap --cov test*.js test/*.js",
