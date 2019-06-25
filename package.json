@@ -1,6 +1,6 @@
 {
   "name": "current-time-website",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "For testing, a website that displays the current time (rounded)",
   "main": "index.js",
   "bin": "run.js",
