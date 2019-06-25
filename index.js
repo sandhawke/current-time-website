@@ -4,23 +4,31 @@ const H = AppMgr.H
 
 const unix = H.safe('the <small>UNIX</small> epoch')
 
+const defaults = {
+  units: 1,
+  offset: 0,
+  epoch: unix,
+  cycle: false
+}
+
 async function create (...options) {
   const m = new AppMgr(...options)
-  addRoutes(m)
+  // I'm smushing the options spaces of AppMgr and addRoutes. Seems harmless.
+  addRoutes(m, Object.assign({}, defaults, ...options))
   await m.start()
   return m
 }
 
-function addRoutes (m) {
+function addRoutes (m, def) {
   m.app.get('/', async (req, res) => {
-    const units = parseFloat(req.query.units) || 1
-    const offset = parseFloat(req.query.offset) || 0
+    const units = parseFloat(req.query.units) || def.units
+    const offset = parseFloat(req.query.offset) || def.offset
     const epoch = req.query.epoch || (
-      offset ? 'the given offset time' : unix
+      offset ? 'the given offset time' : def.epoch
     )
     const type = req.query.accept
     if (type) req.headers['accept'] = type
-    const cycle = req.query.cycle ? req.query.cycle.split(/;/) : false
+    const cycle = req.query.cycle ? req.query.cycle.split(/;/) : def.cycle
     console.log({ cycle })
 
     const now = (Date.now() / 1000) - offset
@@ -39,7 +47,8 @@ function addRoutes (m) {
     }
 
     if (cycle) {
-      const index = Math.round(time / units) % cycle.length
+      const index = Math.max(0, Math.round(time / units)) % cycle.length
+      console.log({ time, index, cycle })
       res.send(cycle[index])
       return
     }

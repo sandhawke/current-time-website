@@ -1,6 +1,7 @@
 const test = require('tape')
 const my = require('.')
 const fetch = require('node-fetch')
+const delay = require('delay')
 
 test(async (t) => {
   const site = await my.create({ port: 0 })
@@ -27,6 +28,31 @@ test(async (t) => {
   })
   const data = await res.text()
   t.ok(data.match(/UNIX/))
+  await site.stop()
+  t.end()
+})
+
+test(async (t) => {
+  const site = await my.create({
+    port: 0,
+    offset: Date.now() / 1000,
+    units: 0.1,
+    cycle: ['a', 'b', 'c']
+  })
+  let data
+
+  data = await (await fetch(site.siteurl)).text()
+  t.equal(data, 'a')
+  await delay(100)
+  data = await (await fetch(site.siteurl)).text()
+  t.equal(data, 'b')
+  await delay(100)
+  data = await (await fetch(site.siteurl)).text()
+  t.equal(data, 'c')
+  await delay(100)
+  data = await (await fetch(site.siteurl)).text()
+  t.equal(data, 'a')
+
   await site.stop()
   t.end()
 })
